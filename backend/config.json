@@ -1,0 +1,3 @@
+{
+    "connectionString":"mongodb://tashukumari:ETslQM7zMd5rrkKC@travelstory-shard-00-00.ec1mc.mongodb.net:27017,travelstory-shard-00-01.ec1mc.mongodb.net:27017,travelstory-shard-00-02.ec1mc.mongodb.net:27017/?replicaSet=atlas-3kwvoi-shard-0&ssl=true&authSource=admin" 
+} 
