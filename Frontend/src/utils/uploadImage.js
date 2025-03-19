@@ -10,11 +10,11 @@ const uploadImage = async (imageFile) => {
    console.log("FormData contents:", formData.get('image'));
 
   try {
-    const response = await axiosInstance.post('http://localhost:8000/image-upload', formData, {
+    const response = await axiosInstance.post('http://localhost:9000/image-upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data', },
     });
-
+    
     // Make sure backend returns an image URL
     console.log("Response from server:", response.data);
     
