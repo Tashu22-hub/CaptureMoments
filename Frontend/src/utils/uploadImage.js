@@ -1,6 +1,5 @@
 import { toast } from "react-toastify";
 import axiosInstance from "./axiosInstance";
-import BASE_URL = "./constants";
 
 const uploadImage = async (imageFile) => {
 
@@ -11,7 +10,7 @@ const uploadImage = async (imageFile) => {
    console.log("FormData contents:", formData.get('image'));
 
   try {
-    const response = await axiosInstance.post(`{BASE_URL}/image-upload`, formData, {
+    const response = await axiosInstance.post('https://capturemoments-backend.onrender.com/image-upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data', },
     });
