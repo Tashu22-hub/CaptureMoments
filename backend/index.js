@@ -239,7 +239,7 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
             return res.status(404).json({ error: true, message: "Travel story not found" });
         }
 
-        const placeholderImgUrl = "http://localhost:9000/assets/placeholder.png";
+        const placeholderImgUrl = "https://capturemoments-backend.onrender.com/assets/placeholder.png";
 
         // Update fields
         travelStory.title = title;
