@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import axiosInstance from "./axiosInstance";
+import BASE_URL = "./constants";
 
 const uploadImage = async (imageFile) => {
 
