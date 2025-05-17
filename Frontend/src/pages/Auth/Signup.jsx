@@ -1,71 +1,79 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Add this import to use navigate
-import PasswordInput from '../../components/Input/PasswordInput';
-import {validateEmail} from "../../utils/helper"; // checking validEmail in input box
-import axiosInstance from '../../utils/axiosInstance';
-import hillImg from '../../assets/hills.png';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Add this import to use navigate
+import PasswordInput from "../../components/Input/PasswordInput";
+import { validateEmail } from "../../utils/helper"; // checking validEmail in input box
+import axiosInstance from "../../utils/axiosInstance";
+import signimg from "../../assets/hills.png";
 
 const Signup = () => {
-  
-  const [name , setName] = useState("");
-  const [email , setEmail] = useState("");
-  const [password , setPassword] = useState("");
-  const [error , setError] = useState(null);
-  const navigate = useNavigate();  // Initialize the navigate function
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Initialize the navigate function
 
-  const handleSignup = async(e) =>{
+  const handleSignup = async (e) => {
     e.preventDefault();
     if (!name) {
       setError("Please enter a valid name");
       return;
     }
-    if (!email){
+    if (!email) {
       setError("Please enter a valid email address");
-    return;
+      return;
     }
-     if (!password) {
+    if (!password) {
       setError("Please enter a required password");
       return;
     }
-    
+
     setError("");
     //signupj API Call-install npm i axios
-    try{
-      const response = await axiosInstance.post("/create-Account", { username :name,email:email, password :password});
+    try {
+      const response = await axiosInstance.post("/create-Account", {
+        username: name,
+        email: email,
+        password: password,
+      });
 
       //handle successful login response
-      if(response.data && response.data.accessToken){
-        localStorage.setItem("token" , response.data.accessToken);
+      if (response.data && response.data.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
         navigate("/dashboard");
       }
-    }catch(error){
+    } catch (error) {
       //handle login error
       if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else {
         setError("An unexpected error occurred. Please try again");
       }
-      
-
-      }
-    };
+    }
+  };
   return (
-    <div className='h-screen bg-cyan-50 overflow-hidden relative'>
-      <div className='login-ui-box right-10 -top-40'></div>
-      <div className='login-ui-box bg-cyan-200 -bottom-40 right-1/2' ></div>
+    <div className="h-screen bg-cyan-50 overflow-hidden relative">
+      <div className="login-ui-box right-10 -top-40"></div>
+      <div className="login-ui-box bg-cyan-200 -bottom-40 right-1/2"></div>
       <div className="container h-screen flex items-center justify-center px-20 mx-auto ">
-        <div className="w-2/4 h-[94vh] flex items-end bg-signup-bg-img bg-cover bg-center rounded-lg p-10 z-50">
-        <img src={hillImg} alt="hiils"/>
-          <div>
-            <h4 className='text-white text-5xl font-semibold leading-[58px]'>Join the <br /> Adventure</h4>
-            <p className="text-white text-[16px] leading-6 pr-7 mt-4"> 
+        <div className="w-2/4 h-[94vh] relative bg-cover bg-center rounded-lg p-10 z-50">
+          <img
+            src={signimg}
+            alt="hiils"
+            className="absolute top-0 left-0 w-full h-full object-cover rounded-lg z-0"
+          />
+
+          <div className="relative z-10 flex flex-col justify-end h-full">
+            <h4 className="text-white text-5xl font-semibold leading-[58px]">
+              Join the <br /> Adventure
+            </h4>
+            <p className="text-white text-[16px] leading-6 pr-7 mt-4">
               Create an account to start documenting your travels and preserving
-              your memories in your personal travel journal 
+              your memories in your personal travel journal
             </p>
           </div>
-        </div> 
+        </div>
 
-        <div className='w-2/4 h-[80vh] bg-white rounded-r-lg relative pt-10 pl-16 pr-16 pb-10 shadow-lg shadow-cyan-200/2 '>
+        <div className="w-2/4 h-[80vh] bg-white rounded-r-lg relative pt-10 pl-16 pr-16 pb-10 shadow-lg shadow-cyan-200/2 ">
           <form onSubmit={handleSignup}>
             <h4 className="text-2xl font-semibold mb-7">Signup</h4>
             <input
@@ -73,7 +81,7 @@ const Signup = () => {
               placeholder="Full Name"
               className="input-box mb-4 w-full p-3 border border-gray-300 rounded-lg outline-none"
               value={name}
-              onChange={({target }) =>{
+              onChange={({ target }) => {
                 setName(target.value);
               }}
             />
@@ -82,26 +90,29 @@ const Signup = () => {
               placeholder="Email"
               className="input-box mb-4 w-full p-3 border border-gray-300 rounded-lg outline-none"
               value={email}
-              onChange={({target }) =>{
+              onChange={({ target }) => {
                 setEmail(target.value);
               }}
             />
-           
-            <PasswordInput 
-            value={password}
-            onChange={({target }) =>{
-              setPassword(target.value);
-            }}
+
+            <PasswordInput
+              value={password}
+              onChange={({ target }) => {
+                setPassword(target.value);
+              }}
             />
-            { error && <p className='text-red-500 text-xs pb-1'>{error}</p> }
+            {error && <p className="text-red-500 text-xs pb-1">{error}</p>}
             {/* <input
               type="password"
               placeholder="Password"
               className="input-box mb-4 w-full p-3 border border-gray-300 rounded-md"
             /> */}
 
-            <button type="submit" className="btn-primary w-full p-3 bg-blue-400 text-white rounded-full hover:text-black hover:shadow-lg transition-all duration-300 shadow-blue-600">
-            CREATE ACCOUNT
+            <button
+              type="submit"
+              className="btn-primary w-full p-3 bg-blue-400 text-white rounded-full hover:text-black hover:shadow-lg transition-all duration-300 shadow-blue-600"
+            >
+              CREATE ACCOUNT
             </button>
             <p className="text-center my-4">Or</p>
             <button
