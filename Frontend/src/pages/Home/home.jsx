@@ -41,7 +41,7 @@ const Home = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:9000/api/emails", {
+      const response = await axios.post("https://capturemoments-backend.onrender.com/api/emails", {
         email,
       });
       console.log("Email saved:", response.data);

@@ -174,7 +174,7 @@ App.post("/image-upload" , upload.single("image") ,async(req , res) => {
         if(!req.file){
             return res.status(400).json({error : true , message : "No image uploaded"})
         }
-        const imageUrl = `http://localhost:9000/uploads/${req.file.filename}`;
+        const imageUrl = `https://capturemoments-backend.onrender.com/uploads/${req.file.filename}`;
         res.status(201).json({imageUrl});
     }catch(error){
         res.status(500).json({error:true , message : error.message});
@@ -239,7 +239,7 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
             return res.status(404).json({ error: true, message: "Travel story not found" });
         }
 
-        const placeholderImgUrl = "http://localhost:9000/assets/placeholder.png";
+        const placeholderImgUrl = "https://capturemoments-backend.onrender.com/assets/placeholder.png";
 
         // Update fields
         travelStory.title = title;
@@ -385,6 +385,6 @@ App.post('/api/emails', async (req, res) => {
 
 
 // Start server
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 10000;
 App.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 module.exports = App; 
