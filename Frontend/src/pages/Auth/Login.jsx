@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';  // Add this import to use navig
 import PasswordInput from '../../components/Input/PasswordInput';
 import {validateEmail} from "../../utils/helper"; // checking validEmail in input box
 import axiosInstance from '../../utils/axiosInstance';
+import nature3 from '../../assets/nature3.png'
 
 const Login = () => {
   const navigate = useNavigate();  // Initialize the navigate function
@@ -48,7 +49,7 @@ const Login = () => {
       <div className='login-ui-box bg-cyan-200 -bottom-40 right-1/2' ></div>
       <div className="container h-screen flex items-center justify-center px-20 mx-auto ">
         <div className="w-2/4 h-[90vh] flex items-end bg-login-bg-img bg-cover bg-center rounded-lg p-10 z-50">
-        <img src="./src/assets/nature3.png" alt="" />
+        <img src={nature3} alt="Nature" />
           <div>
             <h4 className='text-white text-5xl font-semibold leading-[58px]'>Capture Your <br /> Journeys</h4>
             <p className="text-white text-[16px] leading-6 pr-7 mt-4"> 
