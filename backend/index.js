@@ -16,7 +16,14 @@ const {authenticateToken} = require("./utilies");
 
 const App = express();  
 App.use(express.json()); 
-App.use(cors({origin : "*" })); 
+app.use(cors({
+  origin: [
+    "https://capture-moments.vercel.app",
+    "http://localhost:10000"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+})); 
 
 // user created here  
 const User = require("./models/user.model");
