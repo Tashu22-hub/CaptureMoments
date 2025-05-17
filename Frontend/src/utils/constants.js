@@ -1,1 +1,1 @@
- export const BASE_URL = "https://capturemoments-backend.onrender.com"
+ export const BASE_URL = "http://localhost:9000"

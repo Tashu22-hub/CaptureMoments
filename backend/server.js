@@ -239,7 +239,7 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
             return res.status(404).json({ error: true, message: "Travel story not found" });
         }
 
-        const placeholderImgUrl = "https://capturemoments-backend.onrender.com/assets/placeholder.png";
+        const placeholderImgUrl = "http://localhost:9000/assets/placeholder.png";
 
         // Update fields
         travelStory.title = title;
@@ -367,6 +367,24 @@ App.get("/travel-stories/filter" , authenticateToken , async(req ,res) =>{
 //get to see data on postman 
 //post to send data on database 
 
+// Define schema and model
+const emailSchema = new mongoose.Schema({ email: String });
+const Email = mongoose.model('Email', emailSchema);
 
-App.listen(9000);
+// POST route to save email
+App.post('/api/emails', async (req, res) => {
+  try {
+    const newEmail = new Email({ email: req.body.email });
+    await newEmail.save();
+    res.status(201).json({ message: 'Email saved successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save email' });
+  }
+});
+
+
+
+// Start server
+const PORT = process.env.PORT || 9000;
+App.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 module.exports = App; 

@@ -14,7 +14,14 @@ import { DayPicker } from "react-day-picker";
 import moment from "moment";
 import FilterInfoTitle from "../../components/Input/cards/FilterInfoTitle";
 import { getEmptyCardImg, getEmptyCardMessage } from "../../utils/helper";
-
+import { Link } from "react-router-dom";
+import { FaSearch } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa6";
+import { FaLinkedinIn } from "react-icons/fa";
+import { FaGithubAlt } from "react-icons/fa";
+import { BiSolidRocket } from "react-icons/bi";
+import { BsSendFill } from "react-icons/bs";
+import axios from "axios";
 
 // Set Modal app element
 Modal.setAppElement("#root");
@@ -24,9 +31,25 @@ const Home = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
-  const [searchQuery , setSearchQuery] = useState('');
-  const [filterType ,setFilterType] = useState('');
-  const [dateRange , setdateRange] = useState({from: null , to: null});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [dateRange, setdateRange] = useState({ from: null, to: null });
+
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:9000/api/emails", {
+        email,
+      });
+      console.log("Email saved:", response.data);
+      setEmail("");
+    } catch (err) {
+      console.error("Error saving email:", err);
+    }
+  };
   const [openAddEditModel, setOpenAddEditModel] = useState({
     isShown: false,
     type: "add",
@@ -65,42 +88,39 @@ const Home = () => {
         isFavourite: !storyData.isFavourite,
       });
       toast.success("Story updated successfully");
-      if(filterType === "search " && searchQuery){
+      if (filterType === "search " && searchQuery) {
         onSearchStory(searchQuery);
-
-      }
-      else if(filterType === "date"){
+      } else if (filterType === "date") {
         filterStoriesByDate(dateRange);
-      }else{
-      getAllTravelStories();
+      } else {
+        getAllTravelStories();
       }
     } catch (error) {
       toast.error("Failed to update favorite");
     }
   };
 
-  //handle view story to update and delete story 
+  //handle view story to update and delete story
   const handleViewStory = (data) => {
     setOpenViewModel({ isShown: true, data });
   };
   //handle edit function for travel story
   const handleEdit = (data) => {
-    setOpenAddEditModel({ isShown: true, data:data , type : "edit"});
-  }
+    setOpenAddEditModel({ isShown: true, data: data, type: "edit" });
+  };
 
-  //delete story 
-  const deleteTravelStory = async(data) => {
+  //delete story
+  const deleteTravelStory = async (data) => {
     const storyId = data._id;
-    try{
+    try {
       const response = await axiosInstance.delete("/delete-story/" + storyId);
       toast.error("story deleted successfully");
-      setOpenViewModel((prevState) => ({...prevState , isShown :false}));
+      setOpenViewModel((prevState) => ({ ...prevState, isShown: false }));
       getAllTravelStories();
-    }
-    catch(error){
+    } catch (error) {
       setError("error occured here");
     }
-  }
+  };
 
   // Search story
   const onSearchStory = async (query) => {
@@ -110,7 +130,7 @@ const Home = () => {
           query, // Send the search query to the backend
         },
       });
-      
+
       if (response.data && response.data.stories) {
         setFilterType("search"); // Mark the filter type for reference
         setAllStories(response.data.stories); // Update the stories with the search results
@@ -123,43 +143,43 @@ const Home = () => {
       console.error(error); // Log the error for debugging
     }
   };
-  //handling clearing of story or queries 
-  const handleClearSearch =async() =>{
+  //handling clearing of story or queries
+  const handleClearSearch = async () => {
     setFilterType("");
     getAllTravelStories();
-  }
-  //filtering out stories by date Range 
+  };
+  //filtering out stories by date Range
   const filterStoriesByDate = async (day) => {
     // if (!day || !day.from || !day.to) return;
 
     try {
-      const startDate = day.from ? moment(day.from).valueOf():null;
-      const endDate = dateRange.to ? moment(day.to).valueOf():null;
-      if(startDate && endDate){
-        const response = await axiosInstance.get("travel-stories/filter" , {
-          params:{ startDate ,endDate},
+      const startDate = day.from ? moment(day.from).valueOf() : null;
+      const endDate = dateRange.to ? moment(day.to).valueOf() : null;
+      if (startDate && endDate) {
+        const response = await axiosInstance.get("travel-stories/filter", {
+          params: { startDate, endDate },
         });
-      if (response.data && response.data.stories){
-        setFilterType("date");
-        setAllStories(response.data.stories);
-      } 
-    }
+        if (response.data && response.data.stories) {
+          setFilterType("date");
+          setAllStories(response.data.stories);
+        }
+      }
     } catch (error) {
       toast.error("An error occurred while filtering stories by date");
       console.error(error);
     }
   };
-  // selecting sories between dateRange 
-  const handleDayPicker = (day) =>{
+  // selecting sories between dateRange
+  const handleDayPicker = (day) => {
     setdateRange(day);
     filterStoriesByDate(day);
-  }
+  };
   //reseting filtered stories by date rannge
-  const resetFilter = () =>{
-    setdateRange({from:null , to:null});
+  const resetFilter = () => {
+    setdateRange({ from: null, to: null });
     setFilterType("");
     getAllTravelStories();
-  }
+  };
 
   useEffect(() => {
     getUserInfo();
@@ -168,21 +188,26 @@ const Home = () => {
 
   return (
     <>
-      <Navbar userInfo={userInfo} searchQuery ={searchQuery} setSearchQuery ={setSearchQuery} 
-      onSearchNote ={onSearchStory} handleClearSearch={handleClearSearch}
+      <Navbar
+        userInfo={userInfo}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearchNote={onSearchStory}
+        handleClearSearch={handleClearSearch}
       />
-      <div className="container mx-auto py-10">
-        <FilterInfoTitle 
-        filterType ={filterType}
-        filterDates = {dateRange}
-        onClear ={() =>{
-          resetFilter();
-        }}
-/>
+      <div className="container mx-auto py-10 ">
+        <FilterInfoTitle
+          filterType={filterType}
+          filterDates={dateRange}
+          onClear={() => {
+            resetFilter();
+          }}
+        />
         <div className="flex gap-7">
+          {/* //cards area */}
           <div className="flex-1">
             {allStories.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-7 ">
                 {allStories.map((item) => (
                   <TravelStoryCard
                     key={item._id}
@@ -198,23 +223,26 @@ const Home = () => {
                 ))}
               </div>
             ) : (
-              <EmptyCard imgSrc={getEmptyCardImg(filterType)} message={getEmptyCardMessage(filterType)} />
+              <EmptyCard
+                imgSrc={getEmptyCardImg(filterType)}
+                message={getEmptyCardMessage(filterType)}
+              />
 
-
-              // <p className="text-center">No stories found. Click "+" to add a new story!</p>
+              //  <p className="text-center">No stories found. Click "+" to add a new story!</p>
             )}
           </div>
-          <div className="w-[320px]">
-            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lgj">
-            <div className="p-3">
-              <DayPicker 
-              captionLayout="dropdown-buttons"
-              mode ="range"
-              selected ={dateRange}
-              onSelect ={handleDayPicker}
-              pageNavigation
-              />
-         </div>
+          {/* //calender on right side  */}
+          <div className="w-[350px]">
+            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
+              <div className="p-5">
+                <DayPicker
+                  captionLayout="dropdown-buttons"
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDayPicker}
+                  pageNavigation
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -240,30 +268,27 @@ const Home = () => {
 
       <Modal
         isOpen={openViewModel.isShown}
-        onRequestClose={() =>
-          setOpenViewModel({ isShown: false, data: null })
-        }
+        onRequestClose={() => setOpenViewModel({ isShown: false, data: null })}
         style={{ overlay: { backgroundColor: "rgba(0,0,0,0.2)", zIndex: 999 } }}
         className="model-box"
       >
         <ViewTravelStory
           storyInfo={openViewModel.data || null} // Correct data passing here
-          onClose={() => {setOpenViewModel((prevState) =>({ ... prevState , isShown:false })) ;
-        }}
+          onClose={() => {
+            setOpenViewModel((prevState) => ({ ...prevState, isShown: false }));
+          }}
           onEditClick={() => {
-            setOpenViewModel((prevState) =>({ ... prevState , isShown:false }));
+            setOpenViewModel((prevState) => ({ ...prevState, isShown: false }));
             handleEdit(openViewModel.data || null);
-
           }}
           onDeleteClick={() => {
-           deleteTravelStory(openViewModel.data ||null);
-
+            deleteTravelStory(openViewModel.data || null);
           }}
         />
       </Modal>
 
       <button
-        className="w-16 h-16 flex items-center justify-center rounded-full bg-primary hover:bg-cyan-400 fixed right-10 bottom-10"
+        className="w-16 h-16 flex items-center justify-center rounded-full bg-primary hover:bg-cyan-400 fixed right-10 bottom-20 mb-5 "
         onClick={() =>
           setOpenAddEditModel({ isShown: true, type: "add", data: null })
         }
@@ -271,6 +296,57 @@ const Home = () => {
         <MdAdd className="text-[32px] text-white" />
       </button>
       <ToastContainer />
+
+      <footer className="bg-primary h-20 border-t-slate-100 flex-wrap flex justify-between pl-5 pr-5 items-center fixed bottom-1 right-1 left-1">
+        <div className="text-slate-700 font-semibold text-2xl">
+          <a href="/dashboard">MenoTrail</a>
+        </div>
+        <div className="flex justify-evenly">
+          <div className="flex gap-3 mb-2 ">
+            <a
+              href="https://www.linkedin.com/in/tashu-prajapati-68a058248/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaLinkedinIn className="p-2 bg-slate-300 text-4xl rounded" />
+            </a>
+            <a
+              href="https://x.com/tashu_prajapati/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaTwitter className="p-2 bg-slate-300 text-4xl rounded" />
+            </a>
+            <a
+              href="https://github.com/Tashu22-hub/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaGithubAlt className="p-2 bg-slate-300 text-4xl rounded" />
+            </a>
+          </div>
+          <form
+            className="flex justify-center items-center  ml-3"
+            onSubmit={handleSubmit}
+          >
+            <input
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter Your Email..."
+              className="bg-slate-300 pt-2 pb-2 rounded-l pl-3 w-80 max-[445px]:w-64 pr-3 outline-none placeholder:text-slate-800 font-semibold"
+              required
+            />
+            <button
+              type="submit"
+              className="pt-3 pb-3 pl-2 pr-2 rounded-r border-l-2 border-l-slate-800 bg-slate-300 text-slate-800 font-semibold"
+            >
+              <BsSendFill className="object-cover" />
+            </button>
+          </form>
+        </div>
+      </footer>
     </>
   );
 };
