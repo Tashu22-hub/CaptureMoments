@@ -54,6 +54,7 @@ const Signup = () => {
       <div className='login-ui-box bg-cyan-200 -bottom-40 right-1/2' ></div>
       <div className="container h-screen flex items-center justify-center px-20 mx-auto ">
         <div className="w-2/4 h-[94vh] flex items-end bg-signup-bg-img bg-cover bg-center rounded-lg p-10 z-50">
+        <img src="./src/assets/hills.png" alt="" />
           <div>
             <h4 className='text-white text-5xl font-semibold leading-[58px]'>Join the <br /> Adventure</h4>
             <p className="text-white text-[16px] leading-6 pr-7 mt-4"> 
