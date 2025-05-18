@@ -261,44 +261,51 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
 });
 
 
-//delete travel story:- edit story data put accesstoken in authorization story delete from upload folder and database itself
-App.delete("/delete-story/:id" , authenticateToken , async(req , res) =>{
-    const {id} = req.params;
-    const {userId} = req.user;
+App.delete("/delete-story/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
 
-    try{
-        //find the travel story by Id and ensure it belongs to the authenticated user
-        const travelStory = await TravelStory.findOne({_id : id , userId : userId});
+  try {
+    // Find the travel story by ID and ensure it belongs to the authenticated user
+    const travelStory = await TravelStory.findOne({ _id: id, userId });
 
-        if(!travelStory){
-            return res.status(404).json({error : true , maessage : "travel story not found"});
-        }
-
-        //delete the travel story from database
-        await travelStory.deleteOne({_id : id , userId : userId});
-
-        // extract the filename from the ImageUrl 
-        const imageUrl = travelStory.imageUrl;
-        const filename = path.basename(imageUrl);
-
-        //define the file path 
-        const filePath = path.join(__dirname , 'uploads' , filename);
-
-        //delete the image file form the uploads folder
-        fs.unlink(filePath , (err) => {
-            if(err){
-                console.error("falied to delted image file :" , err);
-                //optionally , you counld  still respond with success status here
-                // if you don't want to treat as a crotical error 
-
-            }
-        });
-        res.status(200).json({message:"travel story deleted successfully"});
+    if (!travelStory) {
+      return res.status(404).json({ error: true, message: "Travel story not found" });
     }
-    catch(error){
-        res.status(500).json({error:true , message: " internal error"});
+
+    // Extract public ID from imageUrl to delete from Cloudinary
+    const imageUrl = travelStory.imageUrl;
+
+    // Only try to delete if the image is from Cloudinary
+    if (imageUrl.includes("res.cloudinary.com")) {
+      const urlParts = imageUrl.split("/");
+      const publicIdWithExt = urlParts.slice(urlParts.findIndex(p => p === "capturemoments")).join("/");
+      const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // remove extension
+
+      // Delete the image from Cloudinary
+      const cloudinary = require("cloudinary").v2;
+      cloudinary.config({
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.CLOUD_API_KEY,
+        api_secret: process.env.CLOUD_API_SECRET,
+      });
+
+      const result = await cloudinary.uploader.destroy(publicId);
+
+      if (result.result === "not found") {
+        console.warn("Cloudinary image not found:", publicId);
+      }
     }
-}); 
+
+    // Delete story from DB
+    await travelStory.deleteOne();
+
+    return res.status(200).json({ message: "Travel story deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting travel story:", error);
+    return res.status(500).json({ error: true, message: "Internal server error" });
+  }
+});
 
 //update-is-Favourite- edit story ,  only edit isFavourite from false to true user's accesstoken, same story's same image same id needed 
 App.put("/update-isFavourite/:id" , authenticateToken ,async(req , res) => {
