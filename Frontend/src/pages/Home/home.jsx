@@ -144,7 +144,7 @@ const Home = () => {
       console.error(error); // Log the error for debugging
     }
   };
-  //handling clearing of story or queries
+ //handling searches 
   const handleClearSearch = async () => {
     setFilterType("");
     getAllTravelStories();
