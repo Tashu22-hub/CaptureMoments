@@ -192,54 +192,31 @@ App.get("/get-all-stories", authenticateToken, async (req, res) => {
 App.post(
   "/Add-travel-story",
   authenticateToken,
-  upload.single("image"), // ✅ handles image upload
+  upload.single("image"), // this handles file upload
   async (req, res) => {
     try {
-      let { title, story, visitedLocation, visitedDate } = req.body;
+      const { title, story, visitedLocation, visitedDate } = req.body;
       const { userId } = req.user;
 
-      console.log("Title:", title);
-      console.log("Story:", story);
-      console.log("VisitedDate:", visitedDate);
-      console.log("VisitedLocation:", visitedLocation);
-      console.log("File:", req.file);
+      // ✅ Log to check what is being received
+      console.log("📦 File received from Multer:", req.file);
 
-      // ✅ Normalize visitedLocation: ensure it's always an array
-      if (typeof visitedLocation === "string") {
-        visitedLocation = [visitedLocation];
-      }
-
-      if (
-        !title?.trim() ||
-        !story?.trim() ||
-        !visitedDate ||
-        !visitedLocation ||
-        !Array.isArray(visitedLocation) ||
-        visitedLocation.length === 0
-      ) {
-        return res.status(400).json({
-          error: true,
-          message: "All fields are required",
-        });
-      }
-
-      // ✅ Parse date
       const parsedVisitedDate = new Date(parseInt(visitedDate));
+      const parsedLocation = JSON.parse(visitedLocation);
 
-      // ✅ Get Cloudinary URL from Multer
-      const imageUrl = req.file?.path || null;
+      // ✅ This should contain the Cloudinary URL
+      const imageUrl = req.file?.path;
 
       if (!imageUrl) {
-        return res.status(400).json({
-          error: true,
-          message: "Image upload failed",
-        });
+        console.error("❌ No image URL received from Cloudinary.");
+      } else {
+        console.log("✅ Image uploaded to Cloudinary:", imageUrl);
       }
 
       const travelStory = new TravelStory({
         title,
         story,
-        visitedLocation,
+        visitedLocation: parsedLocation,
         visitedDate: parsedVisitedDate,
         userId,
         imageUrl,
@@ -252,7 +229,7 @@ App.post(
         story: travelStory,
       });
     } catch (error) {
-      console.error("❌ Add travel story error:", error);
+      console.error("🛑 Error while adding story:", error);
       res.status(400).json({
         error: true,
         message: error.message || "Something went wrong",
@@ -260,6 +237,7 @@ App.post(
     }
   }
 );
+
 
 App.post("/image-upload", upload.single("image"), async (req, res) => {
   try {
