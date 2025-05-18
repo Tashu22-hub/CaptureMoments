@@ -205,6 +205,12 @@ App.post(
           message: "All fields are required",
         });
       }
+console.log("Title:", title);
+console.log("Story:", story);
+console.log("VisitedDate:", visitedDate);
+console.log("VisitedLocation:", visitedLocation);
+console.log("File:", req.file);
+
 
       // Parse data
       const parsedVisitedDate = new Date(parseInt(visitedDate));
