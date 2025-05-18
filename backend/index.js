@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-const TravelStory = require("./models/travelStory.model");
+// const TravelStory = require("./models/travelStory.model");
 
 const { authenticateToken } = require("./utilies");
 
