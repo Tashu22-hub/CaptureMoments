@@ -11,11 +11,13 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "capturemoments",
-    allowed_formats: ["jpg", "jpeg", "png", "gif"],
-  },
+  params: (req, file) => ({
+    folder: 'capturemoments',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
+    public_id: `${Date.now()}-${file.originalname.split(".")[0]}`,
+  }),
 });
+
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {

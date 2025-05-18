@@ -37,6 +37,9 @@ const addNewTravelStory = async () => {
 
     if (storyImg && typeof storyImg === "object") {
       formData.append("image", storyImg); // ✅ key name must match multer field
+    }else{
+      toast.error("please select a valid image");
+      return;
     }
 
     const response = await axiosInstance.post("/Add-travel-story", formData, {
@@ -90,55 +93,59 @@ const addNewTravelStory = async () => {
       toast.error("An unexpected error occurred. Please try again.");
     }
   };
-  const handleDeleteStoryImg = async () => {
-    try {
-      // Ensure the image URL exists before attempting deletion
-      if (!storyImg || !storyImg.startsWith("http")) {
-        throw new Error("No image URL found to delete.");
-      }
-  
-      // Delete the image from the server
-      const deleteImgRes = await axiosInstance.delete("/delete-image", {
-        params: {
-          imageUrl: storyImg, // Use the current story image URL
-        },
-      });
-  
-      if (deleteImgRes.data) {
-        // Prepare updated story data without the image
-        const storyId = storyInfo._id;
-        const postData = {
-          title,
-          story,
-          visitedLocation,
-          visitedDate: moment().valueOf(),
-          imageUrl: "", // Remove image reference
-        };
-  
-        // Update the story on the server
-        const response = await axiosInstance.put("/edit-story/ " + storyId , postData);
-  
-        if (response.data && response.data.story) {
-          setStoryImg(null); // Clear the image in the component's state
-          toast.success("Image deleted successfully!");
-        } else {
-          throw new Error("Failed to update story without image.");
-        }
-      } else {
-        throw new Error("Failed to delete image on the server.");
-      }
-    } catch (error) {
-      console.log(error);
-
-      if(error.response && error.response.data && error.response.data.message){
-        setError(error.response.data.message);
-      }else{
-        setError("An unexpected error occurred.");
-      }
-      
+ const handleDeleteStoryImg = async () => {
+  try {
+    // Check if image exists and was uploaded (URL starts with "http")
+    if (!storyImg || !storyImg.startsWith("http")) {
+      setStoryImg(null); // Just clear it from state if it's local
+      return;
     }
-  };
-  
+
+    // Extract Cloudinary public ID from URL
+    const imageUrlParts = storyImg.split("/");
+    const publicIdWithExtension = imageUrlParts[imageUrlParts.length - 1]; // e.g., abc123.jpg
+    const publicId = publicIdWithExtension.split(".")[0]; // Remove extension
+
+    // Send request to backend to delete image
+    const deleteImgRes = await axiosInstance.delete("/delete-image", {
+      params: {
+        publicId, // Your backend must delete by Cloudinary public_id
+      },
+    });
+
+    if (deleteImgRes.data.success) {
+      // After successful deletion, update the story to remove image reference
+      const storyId = storyInfo._id;
+      const postData = {
+        title,
+        story,
+        visitedLocation,
+        visitedDate: moment().valueOf(),
+        imageUrl: "", // Clear image from DB
+      };
+
+      const response = await axiosInstance.put("/edit-story/" + storyId, postData);
+
+      if (response.data && response.data.story) {
+        setStoryImg(null);
+        toast.success("Image deleted successfully!");
+      } else {
+        throw new Error("Failed to update story without image.");
+      }
+    } else {
+      throw new Error("Failed to delete image on the server.");
+    }
+  } catch (error) {
+    console.log(error);
+
+    if (error.response?.data?.message) {
+      setError(error.response.data.message);
+    } else {
+      setError("An unexpected error occurred.");
+    }
+  }
+};
+
 
   const handleTitleChange = (e) => setTitle(e.target.value);
   const handleStoryChange = (e) => setStory(e.target.value);

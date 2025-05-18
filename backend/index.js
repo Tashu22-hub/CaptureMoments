@@ -255,35 +255,47 @@ App.post("/image-upload", upload.single("image"), async (req, res) => {
 // deleting image from uploads- body- form-data put {key :values} use delete
 App.delete("/delete-image", async (req, res) => {
   const { imageUrl } = req.query;
+
   if (!imageUrl) {
-    return res
-      .status(400)
-      .json({ error: true, message: "imageUrl parameter is required" });
+    return res.status(400).json({
+      error: true,
+      message: "imageUrl parameter is required",
+    });
   }
 
   try {
-    // Extract public ID from URL
-    // Example: https://res.cloudinary.com/<cloud_name>/image/upload/v1234567/capturemoments/abcd1234.jpg
-    // public_id = capturemoments/abcd1234 (remove extension and base URL)
+    // Extract public ID from full Cloudinary URL
+    const regex = /\/capturemoments\/([^/.]+)\.(jpg|jpeg|png|gif)/;
+    const match = imageUrl.match(regex);
 
-    const urlParts = imageUrl.split("/");
-    const publicIdWithExt = urlParts
-      .slice(urlParts.findIndex((part) => part === "capturemoments"))
-      .join("/");
-    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // remove extension
+    if (!match || !match[1]) {
+      return res.status(400).json({
+        error: true,
+        message: "Unable to extract public ID from imageUrl",
+      });
+    }
+
+    const publicId = `capturemoments/${match[1]}`; // e.g., capturemoments/abcd1234
 
     const result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result === "not found") {
-      return res
-        .status(404)
-        .json({ error: true, message: "Image not found on Cloudinary" });
+      return res.status(404).json({
+        error: true,
+        message: "Image not found on Cloudinary",
+      });
     }
 
-    res.status(200).json({ message: "Image deleted successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Image deleted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: true, message: error.message });
+    console.error("Cloudinary delete error:", error);
+    res.status(500).json({
+      error: true,
+      message: "Server error while deleting image",
+    });
   }
 });
 
@@ -297,13 +309,15 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
   const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
   const { userId } = req.user;
 
-  if (!title || !story || !visitedLocation || !visitedDate || !imageUrl) {
+  if (!title || !story || !visitedLocation || !visitedDate) {
     return res
       .status(400)
-      .json({ error: true, message: "All fields are required" });
+      .json({ error: true, message: "All fields except imageUrl are required" });
   }
 
   const parsedVisitedDate = new Date(parseInt(visitedDate));
+  const placeholderImgUrl =
+    "https://capturemoments-backend.onrender.com/assets/placeholder.png";
 
   try {
     const travelStory = await TravelStory.findOne({ _id: id, userId });
@@ -314,13 +328,10 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
         .json({ error: true, message: "Travel story not found" });
     }
 
-    const placeholderImgUrl =
-      "https://capturemoments-backend.onrender.com/assets/placeholder.png";
-
     travelStory.title = title;
     travelStory.story = story;
     travelStory.visitedLocation = visitedLocation;
-    travelStory.imageUrl = imageUrl || placeholderImgUrl;
+    travelStory.imageUrl = imageUrl?.trim() !== "" ? imageUrl : placeholderImgUrl;
     travelStory.visitedDate = parsedVisitedDate;
 
     await travelStory.save();
@@ -331,6 +342,7 @@ App.put("/edit-story/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ error: true, message: "Internal server error" });
   }
 });
+
 
 App.delete("/delete-story/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
