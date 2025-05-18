@@ -164,7 +164,7 @@ App.post("/Add-travel-story" , authenticateToken , async(req , res) => {
     };
 });
 
-//Get All Travel Stories
+//storries 
 App.get("/get-all-stories" , authenticateToken , async(req , res) => {
     const {userId} = req.user;
     try{
