@@ -192,35 +192,55 @@ App.get("/get-all-stories", authenticateToken, async (req, res) => {
 App.post(
   "/Add-travel-story",
   authenticateToken,
-  upload.single("image"), // ✅ this handles the image upload
+  upload.single("image"), // ✅ handles image upload
   async (req, res) => {
     try {
-      const { title, story, visitedLocation, visitedDate } = req.body;
+      let { title, story, visitedLocation, visitedDate } = req.body;
       const { userId } = req.user;
 
-      // Validate fields
-      if (!title || !story || !visitedLocation || !visitedDate) {
+      console.log("Title:", title);
+      console.log("Story:", story);
+      console.log("VisitedDate:", visitedDate);
+      console.log("VisitedLocation:", visitedLocation);
+      console.log("File:", req.file);
+
+      // ✅ Normalize visitedLocation: ensure it's always an array
+      if (typeof visitedLocation === "string") {
+        visitedLocation = [visitedLocation];
+      }
+
+      // ✅ Validate all required fields
+      if (
+        !title?.trim() ||
+        !story?.trim() ||
+        !visitedDate ||
+        !visitedLocation ||
+        !Array.isArray(visitedLocation) ||
+        visitedLocation.length === 0
+      ) {
         return res.status(400).json({
           error: true,
           message: "All fields are required",
         });
       }
-console.log("Title:", title);
-console.log("Story:", story);
-console.log("VisitedDate:", visitedDate);
-console.log("VisitedLocation:", visitedLocation);
-console.log("File:", req.file);
 
-
-      // Parse data
+      // ✅ Parse date
       const parsedVisitedDate = new Date(parseInt(visitedDate));
-      const parsedLocation = JSON.parse(visitedLocation); // because it comes as JSON string
-      const imageUrl = req.file?.path || null; // Cloudinary gives path here
+
+      // ✅ Get Cloudinary URL from Multer
+      const imageUrl = req.file?.path || null;
+
+      if (!imageUrl) {
+        return res.status(400).json({
+          error: true,
+          message: "Image upload failed",
+        });
+      }
 
       const travelStory = new TravelStory({
         title,
         story,
-        visitedLocation: parsedLocation,
+        visitedLocation,
         visitedDate: parsedVisitedDate,
         userId,
         imageUrl,
@@ -233,7 +253,7 @@ console.log("File:", req.file);
         story: travelStory,
       });
     } catch (error) {
-      console.error(error);
+      console.error("❌ Add travel story error:", error);
       res.status(400).json({
         error: true,
         message: error.message || "Something went wrong",
@@ -241,6 +261,7 @@ console.log("File:", req.file);
     }
   }
 );
+
 App.post("/image-upload", upload.single("image"), async (req, res) => {
   try {
     console.log("Request body:", req.body);
