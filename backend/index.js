@@ -234,6 +234,18 @@ App.post(
     }
   }
 );
+App.post("/image-upload", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ error: true, message: "No image uploaded" });
+    }
+
+    return res.status(200).json({ imageUrl: req.file.path });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: true, message: "Image upload failed" });
+  }
+});
 // deleting image from uploads- body- form-data put {key :values} use delete
 App.delete("/delete-image", async (req, res) => {
   const { imageUrl } = req.query;
