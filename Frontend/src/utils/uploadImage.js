@@ -2,29 +2,25 @@ import { toast } from "react-toastify";
 import axiosInstance from "./axiosInstance";
 
 const uploadImage = async (imageFile) => {
-
-
   const formData = new FormData();
-  formData.append('image', imageFile); // Attach the image to form data
-   // Check if file is appended correctly
-   console.log("FormData contents:", formData.get('image'));
+  formData.append("image", imageFile);
 
   try {
-    const response = await axiosInstance.post('https://capturemoments-backend.onrender.com/image-upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', }
-    });
-    
-    // Make sure backend returns an image URL
+    const response = await axiosInstance.post(
+      "https://capturemoments-backend.onrender.com/image-upload",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
     console.log("Response from server:", response.data);
-    
-      return response.data; // Return only the imageUrl
-   
+    return response.data.imageUrl; // return just the URL string
   } catch (error) {
     console.error("Image upload failed:", error);
-    // toast.error("Image upload failed. Please try again.");
     throw error;
   }
 };
+
 
 export default uploadImage;

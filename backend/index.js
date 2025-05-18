@@ -11,6 +11,8 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
+const express = require('express');
+const upload = require('./uploads'); 
 
 const {authenticateToken} = require("./utilies"); 
 
@@ -176,93 +178,89 @@ App.get("/get-all-stories" , authenticateToken , async(req , res) => {
 });
 
 //Route to handle image upload using multer installed here in backend 
-App.post("/image-upload" , upload.single("image") ,async(req , res) => {
-    try{
-        if(!req.file){
-            return res.status(400).json({error : true , message : "No image uploaded"})
-        }
-        const imageUrl = `https://capturemoments-backend.onrender.com/uploads/${req.file.filename}`;
-        res.status(201).json({imageUrl});
-    }catch(error){
-        res.status(500).json({error:true , message : error.message});
+app.post('/image-upload', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: true, message: 'No image uploaded' });
     }
-});
+    // req.file.path contains the Cloudinary image URL
+    const imageUrl = req.file.path;
 
+    res.status(201).json({ imageUrl });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+});
 
 // deleting image from uploads- body- form-data put {key :values} use delete 
-App.delete("/delete-image" , async(req , res) => {
-    const {imageUrl} = req.query;
+App.delete("/delete-image", async (req, res) => {
+  const { imageUrl } = req.query;
+  if (!imageUrl) {
+    return res.status(400).json({ error: true, message: "imageUrl parameter is required" });
+  }
 
-    if(!imageUrl){
-        return res.status(400).json({error : true , message : "imageUrl parameter is required"});
-    }
-    try{
-        //Extract the filename from the imageUrl
-        const filename = path.basename(imageUrl);
+  try {
+    // Extract public ID from URL
+    // Example: https://res.cloudinary.com/<cloud_name>/image/upload/v1234567/capturemoments/abcd1234.jpg
+    // public_id = capturemoments/abcd1234 (remove extension and base URL)
 
-        const filePath = path.join(__dirname , 'uploads' , filename);
+    const urlParts = imageUrl.split("/");
+    const publicIdWithExt = urlParts.slice(urlParts.findIndex(part => part === "capturemoments")).join("/");
+    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // remove extension
 
-        //check if the file exists
-        if(fs.existsSync(filePath)){
-            //delete the file from the uploads folder
-            fs.unlinkSync(filePath);
-            res.status(200).json({message : "image deleted successfully"});
-        }
-        else{
-            res.status(200).json({error : true , message: "image not found"});
-        }
-    }catch(error){
-        res.status(500).json({error : true , message : error.message});
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    if (result.result === "not found") {
+      return res.status(404).json({ error: true, message: "Image not found on Cloudinary" });
     }
 
+    res.status(200).json({ message: "Image deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: true, message: error.message });
+  }
 });
+
 //server static files from the uploads and assests directory
-App.use("/uploads" , express.static(path.join(__dirname , "uploads")));
+// App.use("/uploads" , express.static(path.join(__dirname , "uploads")));
 App.use("/assets" , express.static(path.join(__dirname , "assets")));
 
 //edit travel story
 App.put("/edit-story/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+  const { userId } = req.user;
 
-    //first Add-travel-story by get user accesstoken , Add-story (take accesstoken )->
-    // get-all-story(put accesstoken on authorization -> bearer token) , edit-story(update data on body ,raw) -> put get-all-story accesstoken - > update data successfully
-    const { id } = req.params;
-    const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
-    const { userId } = req.user; // Provide access token ID in authorization
+  if (!title || !story || !visitedLocation || !visitedDate || !imageUrl) {
+    return res.status(400).json({ error: true, message: "All fields are required" });
+  }
 
-    // Validate required fields
-    if (!title|| !story || !visitedLocation|| !visitedDate || !imageUrl) {
-        return res.status(400).json({ error: true, message: "All fields are required" });
+  const parsedVisitedDate = new Date(parseInt(visitedDate));
+
+  try {
+    const travelStory = await TravelStory.findOne({ _id: id, userId });
+
+    if (!travelStory) {
+      return res.status(404).json({ error: true, message: "Travel story not found" });
     }
 
-    // Convert visitedDate from milliseconds to Date object and validate
-    const parsedVisitedDate = new Date(parseInt(visitedDate));
-   
+    const placeholderImgUrl = "https://capturemoments-backend.onrender.com/assets/placeholder.png";
 
-    try { 
-        //find the travel story by ID and ensure it belongs to the authenticated user
-        const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+    travelStory.title = title;
+    travelStory.story = story;
+    travelStory.visitedLocation = visitedLocation;
+    travelStory.imageUrl = imageUrl || placeholderImgUrl;
+    travelStory.visitedDate = parsedVisitedDate;
 
-        if (!travelStory) { // if travel story not available then 
-            return res.status(404).json({ error: true, message: "Travel story not found" });
-        }
+    await travelStory.save();
 
-        const placeholderImgUrl = "https://capturemoments-backend.onrender.com/assets/placeholder.png";
-
-        // Update fields
-        travelStory.title = title;
-        travelStory.story = story;
-        travelStory.visitedLocation = visitedLocation;
-        travelStory.imageUrl = imageUrl || placeholderImgUrl;
-        travelStory.visitedDate = parsedVisitedDate;
-
-        await travelStory.save();
-        res.status(200).json({ story: travelStory, message: "Update successful" });
-
-    } catch (error) {
-        console.error("Error updating travel story:", error);
-        res.status(500).json({ error: true, message: "Internal server error" });
-    }
+    res.status(200).json({ story: travelStory, message: "Update successful" });
+  } catch (error) {
+    console.error("Error updating travel story:", error);
+    res.status(500).json({ error: true, message: "Internal server error" });
+  }
 });
+
 
 //delete travel story:- edit story data put accesstoken in authorization story delete from upload folder and database itself
 App.delete("/delete-story/:id" , authenticateToken , async(req , res) =>{
