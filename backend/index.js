@@ -17,7 +17,7 @@ const {authenticateToken} = require("./utilies");
 
 const App = express();  
 App.use(express.json()); 
-app.use(cors({
+App.use(cors({
   origin: [
     "https://capture-moments.vercel.app",
     "http://localhost:10000"
