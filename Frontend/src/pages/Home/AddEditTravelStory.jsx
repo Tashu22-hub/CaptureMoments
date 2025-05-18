@@ -43,6 +43,7 @@ const addNewTravelStory = async () => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout:60000,
     });
 
     if (response.data.story) {

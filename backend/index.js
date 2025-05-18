@@ -17,6 +17,7 @@ const { authenticateToken } = require("./utilies");
 
 const App = express();
 App.use(express.json());
+
 App.use(
   cors({
     origin: ["https://capture-moments.vercel.app", "http://localhost:10000"],
@@ -236,16 +237,21 @@ App.post(
 );
 App.post("/image-upload", upload.single("image"), async (req, res) => {
   try {
+    console.log("Request body:", req.body);
+    console.log("File info:", req.file);
+
     if (!req.file || !req.file.path) {
-      return res.status(400).json({ error: true, message: "No image uploaded" });
+      return res.status(400).json({ error: "No image uploaded." });
     }
 
-    return res.status(200).json({ imageUrl: req.file.path });
+    const imageUrl = req.file.path;
+    res.status(200).json({ imageUrl });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: true, message: "Image upload failed" });
+    console.error("Image upload error:", error);
+    res.status(500).json({ error: "Server error while uploading image." });
   }
 });
+
 // deleting image from uploads- body- form-data put {key :values} use delete
 App.delete("/delete-image", async (req, res) => {
   const { imageUrl } = req.query;
