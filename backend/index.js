@@ -209,7 +209,6 @@ App.post(
         visitedLocation = [visitedLocation];
       }
 
-      // ✅ Validate all required fields
       if (
         !title?.trim() ||
         !story?.trim() ||
