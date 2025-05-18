@@ -27,36 +27,36 @@ const AddEditTravelStory = ({ storyInfo, type, onClose, getAllTravelStories }) =
       addNewTravelStory();
     }
   };
+const addNewTravelStory = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("story", story);
+    formData.append("visitedLocation", JSON.stringify(visitedLocation));
+    formData.append("visitedDate", visitedDate ? moment(visitedDate).valueOf() : moment().valueOf());
 
-  const addNewTravelStory = async () => {
-    try {
-      let imageUrl = "";
-
-      if (storyImg && typeof storyImg === "object") {
-        const imgUploadRes = await uploadImage(storyImg);
-        imageUrl = imgUploadRes.imageUrl ;
-      }
-
-      const response = await axiosInstance.post("/Add-travel-story", {
-        title,
-        story,
-        imageUrl: imageUrl || "",
-        visitedLocation,
-        visitedDate: visitedDate ? moment(visitedDate).valueOf() : moment().valueOf(),
-      });
-
-      if (response.data.story) {
-        toast.success("Story added successfully!");
-        getAllTravelStories();
-        onClose();
-      } else {
-        throw new Error("Failed to add story.");
-      }
-    } catch (error) {
-      console.error("Add story error:", error.response?.data || error.message);
-      toast.error("An error occurred while adding the story. Please try again.");
+    if (storyImg && typeof storyImg === "object") {
+      formData.append("image", storyImg); // ✅ key name must match multer field
     }
-  };
+
+    const response = await axiosInstance.post("/Add-travel-story", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.data.story) {
+      toast.success("Story added successfully!");
+      getAllTravelStories();
+      onClose();
+    } else {
+      throw new Error("Failed to add story.");
+    }
+  } catch (error) {
+    console.error("Add story error:", error.response?.data || error.message);
+    toast.error(error.response?.data?.message || "An error occurred while adding the story.");
+  }
+};
 
   const updateTravelStory = async () => {
     const storyId = storyInfo._id;
