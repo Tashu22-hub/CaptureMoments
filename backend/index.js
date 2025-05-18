@@ -177,7 +177,7 @@ App.get("/get-all-stories" , authenticateToken , async(req , res) => {
 });
 
 //Route to handle image upload using multer installed here in backend 
-app.post('/image-upload', upload.single('image'), (req, res) => {
+App.post('/image-upload', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: true, message: 'No image uploaded' });
