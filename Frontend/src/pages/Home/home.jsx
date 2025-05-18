@@ -303,29 +303,7 @@ const Home = () => {
           <a href="/dashboard">MenoTrail</a>
         </div>
         <div className="flex justify-evenly">
-          <div className="flex gap-3 mb-2 ">
-            <a
-              href="https://www.linkedin.com/in/tashu-prajapati-68a058248/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaLinkedinIn className="p-2 bg-slate-300 text-4xl rounded" />
-            </a>
-            <a
-              href="https://x.com/tashu_prajapati/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaTwitter className="p-2 bg-slate-300 text-4xl rounded" />
-            </a>
-            <a
-              href="https://github.com/Tashu22-hub/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGithubAlt className="p-2 bg-slate-300 text-4xl rounded" />
-            </a>
-          </div>
+         
           <form
             className="flex justify-center items-center  ml-3"
             onSubmit={handleSubmit}
