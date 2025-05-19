@@ -306,7 +306,7 @@ const Home = () => {
          
           <form
             className="flex justify-center items-center  ml-3"
-            onSubmit={handleSubmit}
+           
           >
             <input
               name="email"
@@ -320,6 +320,7 @@ const Home = () => {
             <button
               type="submit"
               className="pt-3 pb-3 pl-2 pr-2 rounded-r border-l-2 border-l-slate-800 bg-slate-300 text-slate-800 font-semibold"
+               onSubmit={handleSubmit}
             >
               <BsSendFill className="object-cover" />
             </button>
