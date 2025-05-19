@@ -46,7 +46,7 @@ const Home = () => {
         email,
       });
       console.log("Email saved:", response.data);
-      toast.success("email sent successfully!!);
+      toast.success("email sent successfully!!");
       setEmail("");
     } catch (err) {
       console.error("Error saving email:", err);
