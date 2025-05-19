@@ -481,7 +481,7 @@ const emailSchema = new mongoose.Schema({ email: String });
 const Email = mongoose.model("Email", emailSchema);
 
 // POST route to save email
-App.post("/api/emails", async (req, res) => {
+App.post("/emails", async (req, res) => {
   try {
     const newEmail = new Email({ email: req.body.email });
     await newEmail.save();
