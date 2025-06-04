@@ -5,7 +5,7 @@ The **Travel Story App** is a full-stack web application that enables users to *
 ---
 
 ## 📖 Overview
-
+ 
 Traveling is all about creating memories — this app helps users preserve those memories in a visual and interactive format. Once logged in, users can create travel stories, upload photos, and record details about their trips, such as **where they went**, **when they visited**, and **what they experienced**. 
 
 The application follows modern web development practices and features a mobile-friendly interface. It is built using the **MERN stack** (MongoDB, Express, React, Node.js) and supports **JWT-based authentication** to protect user data.
