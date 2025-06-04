@@ -20,7 +20,7 @@ App.use(express.json());
 
 App.use(
   cors({
-    origin: ["https://capture-moments.vercel.app", "http://localhost:10000"],
+    origin: ["https://capture-moments.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
